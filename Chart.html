@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Rainfall Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <select id="stationSelect">
+        <option value="48381">ขอนแก่น</option>
+        <option value="48384">ท่าพระ สกษ.</option>
+        <option value="48353">เลย</option>
+        <option value="48350">เลย สกษ.</option>
+        <option value="48421">ชัยภูมิ</option>
+        <option value="48382">มหาสารคาม</option>
+        <option value="48390">กาฬสินธุ์</option>
+        <option value="48357">นครพนม</option>
+        <option value="48356">สกลนคร</option>
+        <option value="48355">สกลนคร สกษ.</option>
+        <option value="48360">หนองบัวลำภู</option>
+        <option value="48352">หนองคาย</option>
+        <option value="48363">บึงกาฬ</option>
+    </select>
+    <canvas id="rainfallChart" width="400" height="200"></canvas>
+    <script>
+        let chartInstance = null;
+
+        async function fetchRainfallData() {
+            const url = 'http://localhost:3000/api/rainfall';
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('Fetched Data:', data); // ตรวจสอบข้อมูลที่ถูกดึงมา
+                return data.StationMonthlyRainfall;
+            } catch (error) {
+                console.error('Error fetching the rainfall data:', error);
+            }
+        }
+
+        async function createChart(stationNumber) {
+            const data = await fetchRainfallData();
+            
+            if (!data) {
+                console.error('No data available.');
+                return;
+            }
+
+            // Filter data for the specific station by WmoStationNumber
+            const stationData = data.find(entry => entry.WmoStationNumber === stationNumber);
+
+            if (!stationData) {
+                console.error('No data found for the specified station.');
+                return;
+            }
+
+            console.log('Station Data:', stationData);
+
+            // Mapping the data
+            const labels = [
+                'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
+                'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+            ];
+            const monthlyRainfall = stationData.MonthlyRainfall;
+            const totalRainfall = stationData.MonthlyRainfall;
+
+            const rainfallAmounts = [
+                parseFloat(monthlyRainfall.RainfallJAN) || 0,
+                parseFloat(monthlyRainfall.RainfallFEB) || 0,
+                parseFloat(monthlyRainfall.RainfallMAR) || 0,
+                parseFloat(monthlyRainfall.RainfallAPR) || 0,
+                parseFloat(monthlyRainfall.RainfallMAY) || 0,
+                parseFloat(monthlyRainfall.RainfallJUN) || 0,
+                parseFloat(monthlyRainfall.RainfallJUL) || 0,
+                parseFloat(monthlyRainfall.RainfallAUG) || 0,
+                parseFloat(monthlyRainfall.RainfallSEP) || 0,
+                parseFloat(monthlyRainfall.RainfallOCT) || 0,
+                parseFloat(monthlyRainfall.RainfallNOV) || 0,
+                parseFloat(monthlyRainfall.RainfallDEC) || 0
+            ];
+
+            console.log('Rainfall Amounts:', rainfallAmounts);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('rainfallChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'ฝนรวม',
+                        data: rainfallAmounts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 500
+                        }
+                    }
+                }
+            });
+        }
+
+        // Event listener for the dropdown
+        document.getElementById('stationSelect').addEventListener('change', function() {
+            const stationNumber = this.value;
+            createChart(stationNumber);
+        });
+
+        // Initial chart display
+        createChart('48381'); // Default station
+
+    </script>
+</body>
+</html>
