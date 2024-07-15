@@ -35,6 +35,16 @@ app.get('/api/rainfall', async (req, res) => {
     }
 });
 
+app.get('/api/temp', async (req, res) => {
+    try {
+        const response = await fetch('https://radarkhonkaen.com/canvas/API/');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch data' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function fetchforecastLayer() {
         try {
-            const response = await fetch("http://localhost:3000/api/dailyforecast");
+            const response = await fetch("https://leaf-weather.onrender.com/api/dailyforecast");
             const forecastData = await response.json();
 
             const regionCoordinates = {

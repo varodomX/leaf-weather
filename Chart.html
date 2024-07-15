@@ -27,7 +27,7 @@
         let chartInstance = null;
 
         async function fetchRainfallData() {
-            const url = 'http://localhost:3000/api/rainfall';
+            const url = 'https://leaf-weather.onrender.com/api/rainfall';
             try {
                 const response = await fetch(url);
                 const data = await response.json();

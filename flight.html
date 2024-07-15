@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Radar Data</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map { width: 100%; height: 600px; }
+    </style>
+</head>
+<body>
+    <h1>Flight Radar Data</h1>
+    <div id="map"></div>
+    <script>
+        // Adjust the coordinates to expand the search boundary
+        const url = 'https://flight-radar1.p.rapidapi.com/flights/list-in-boundary?bl_lat=5.0&bl_lng=90.0&tr_lat=25.0&tr_lng=110.0&limit=300';
+        const options = {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': '5e7f8e1585mshcc3b28d6042667cp13b9c2jsn02546b96725a',
+                'x-rapidapi-host': 'flight-radar1.p.rapidapi.com'
+            }
+        };
+
+        async function fetchFlightData() {
+            try {
+                const response = await fetch(url, options);
+                const result = await response.json();
+                console.log('Fetched Data:', result);
+
+                if (result && result.aircraft) {
+                    addFlightsToMap(result.aircraft);
+                } else {
+                    console.error('Unexpected data format:', result);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function addFlightsToMap(flights) {
+            const map = L.map('map').setView([15.0, 100.0], 5); // Adjust zoom level as needed
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            const airplaneIcon = L.icon({
+                iconUrl: 'icon/pngwing.png', // Use the URL or base64 data of the uploaded image
+                iconSize: [25, 25], // Adjust the size as needed
+                iconAnchor: [12, 12], // Point of the icon which will correspond to marker's location
+                popupAnchor: [0, -12] // Point from which the popup should open relative to the iconAnchor
+            });
+
+            flights.forEach(flight => {
+                const lat = parseFloat(flight[2]); // ละติจูด
+                const lng = parseFloat(flight[3]); // ลองจิจูด
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const flightNumber = flight[13]; // หมายเลขเที่ยวบิน
+                    const altitude = flight[4]; // ความสูง
+                    const speed = flight[5]; // ความเร็ว
+
+                    const marker = L.marker([lat, lng], { icon: airplaneIcon }).addTo(map);
+                    marker.bindPopup(`<b>Flight:</b> ${flightNumber}<br><b>Altitude:</b> ${altitude} ft<br><b>Speed:</b> ${speed} km/h`);
+                } else {
+                    console.warn('Invalid coordinates:', flight);
+                }
+            });
+        }
+
+        fetchFlightData();
+    </script>
+</body>
+</html>
