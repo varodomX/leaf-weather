@@ -7,7 +7,7 @@ app.use(cors());  // ใช้ cors เพื่ออนุญาตการ�
 
 app.get('/api/weather', async (req, res) => {
     try {
-        const response = await fetch('https://data.tmd.go.th/api/Weather3Hours/V2/?uid=u63varodom2011&ukey=4e24bb2b6db8caf2e9ce637ec9d9a815&format=json');
+        const response = await fetch('https://radarkhonkaen.com/json/api.php');
         const data = await response.json();
         res.json(data);
     } catch (error) {
